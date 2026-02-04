@@ -1,0 +1,66 @@
+@use '@carbon/styles/scss/config' with ($use-flexbox-grid: true,
+  $css--font-face: true);
+@use '@carbon/styles/scss/themes';
+@use '@carbon/styles';
+
+// --- MODERN THEME OVERRIDES ---
+:root {
+  // Softening the stark white/gray contrast
+  --cds-background: #f8f9fa;
+  --cds-ui-01: #f8f9fa;
+  --cds-ui-02: #ffffff; // Cards/Tiles background
+
+  // Rounded corners (Carbon is strict square, we override for "modern" feel)
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+
+  // Shadows for depth
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'IBM Plex Sans', system-ui, -apple-system, sans-serif; // Prefer Inter if available, fallback to Carbon
+  background-color: var(--cds-background);
+  color: #161616;
+}
+
+// Global visual improvements
+.cds--tile {
+  background: var(--cds-ui-02);
+  border: 1px solid transparent; // Remove default border
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.cds--modal-container {
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.cds--data-table-container {
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+// Soften inputs
+.cds--text-input,
+.cds--select-input,
+.cds--number-input,
+.cds--date-picker__input {
+  border-radius: var(--border-radius-sm);
+}
+
+// Make buttons slightly rounded
+.cds--btn {
+  border-radius: var(--border-radius-sm);
+}
