@@ -1,7 +1,11 @@
 export const STORAGE_KEYS = {
     SUBSCRIPTIONS: 'suscripciones_v1',
     CATEGORIES: 'categorias_v1',
+    USERS: 'usuarios_v1',
+    CURRENT_USER: 'usuario_actual_v1'
 };
+
+export const getUserKey = (key, userId) => `${key}_${userId}`;
 
 export const getFromStorage = (key, defaultValue = null) => {
     try {

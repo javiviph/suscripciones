@@ -10,17 +10,18 @@ import { useCategorias } from './hooks/useCategorias';
 import { AnimatedButton } from './components/ui/AnimatedButton';
 import { GlassCard } from './components/ui/GlassCard';
 
+import { useUsers } from './hooks/useUsers';
+import UserNavigation from './components/UserNavigation';
+import WelcomeScreen from './components/WelcomeScreen';
+
 function App() {
-    const { suscripciones, addSuscripcion, updateSuscripcion, deleteSuscripcion } = useSuscripciones();
-    const { categorias, addCategoria, deleteCategoria } = useCategorias();
+    const { users, currentUser, addUser, selectUser, logout, loading: usersLoading } = useUsers();
+
+    const { suscripciones, addSuscripcion, updateSuscripcion, deleteSuscripcion } = useSuscripciones(currentUser?.id);
+    const { categorias, addCategoria, deleteCategoria } = useCategorias(currentUser?.id);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [editingSubscription, setEditingSubscription] = useState(null);
-    // Notification state simplified for now (can add Toast component later)
-
-    // Derived state for desktop vs mobile check could be added here or handled via CSS
-    // For now, we rely on CSS media queries for layout
 
     const handleEdit = (sub) => {
         setEditingSubscription(sub);
@@ -52,14 +53,29 @@ function App() {
         setTheme(prev => prev === 'light' ? 'dark' : 'light');
     };
 
+    if (usersLoading) return null;
+
+    if (!currentUser) {
+        return <WelcomeScreen users={users} onSelect={selectUser} onAdd={addUser} />;
+    }
+
     return (
         <div className="app-layout">
             <header className="app-header">
                 <div className="header-content">
                     <h1>Suscriptions</h1>
-                    <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
-                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                    </button>
+                    <div className="header-actions">
+                        <UserNavigation
+                            users={users}
+                            currentUser={currentUser}
+                            onSelect={selectUser}
+                            onAdd={addUser}
+                            onLogout={logout}
+                        />
+                        <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
+                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -87,7 +103,7 @@ function App() {
                         <GlassCard>
                             <h3>{editingSubscription ? 'Editar Suscripción' : 'Nueva Suscripción'}</h3>
                             <SubscriptionForm
-                                key={editingSubscription ? editingSubscription.id : 'new'}
+                                key={`${currentUser.id}-${editingSubscription ? editingSubscription.id : 'new'}`}
                                 categories={categorias}
                                 onAdd={handleSaveSuscripcion}
                                 onAddCategory={addCategoria}
@@ -124,7 +140,7 @@ function App() {
                                 <button className="close-btn" onClick={handleCloseModal}><X size={20} /></button>
                             </div>
                             <SubscriptionForm
-                                key={editingSubscription ? `modal-${editingSubscription.id}` : 'modal-new'}
+                                key={`modal-${currentUser.id}-${editingSubscription ? editingSubscription.id : 'new'}`}
                                 categories={categorias}
                                 onAdd={handleSaveSuscripcion}
                                 onAddCategory={addCategoria}
@@ -150,6 +166,11 @@ function App() {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                }
+                .header-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
                 }
                 .header-content h1 {
                     font-size: 2rem;

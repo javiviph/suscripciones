@@ -1,30 +1,39 @@
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { STORAGE_KEYS, getFromStorage, saveToStorage } from '../utils/storage';
+import { STORAGE_KEYS, getFromStorage, saveToStorage, getUserKey } from '../utils/storage';
 import { CATEGORIAS_DEFAULT } from '../constants/categorias';
 
-export const useCategorias = () => {
+export const useCategorias = (userId) => {
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Load from storage or set defaults
     useEffect(() => {
-        const stored = getFromStorage(STORAGE_KEYS.CATEGORIES);
+        if (!userId) {
+            setCategorias([]);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        const key = getUserKey(STORAGE_KEYS.CATEGORIES, userId);
+        const stored = getFromStorage(key);
         if (stored && stored.length > 0) {
             setCategorias(stored);
         } else {
             setCategorias(CATEGORIAS_DEFAULT);
-            saveToStorage(STORAGE_KEYS.CATEGORIES, CATEGORIAS_DEFAULT);
+            saveToStorage(key, CATEGORIAS_DEFAULT);
         }
         setLoading(false);
-    }, []);
+    }, [userId]);
 
     // Save whenever it changes
     useEffect(() => {
-        if (!loading) {
-            saveToStorage(STORAGE_KEYS.CATEGORIES, categorias);
+        if (!loading && userId) {
+            const key = getUserKey(STORAGE_KEYS.CATEGORIES, userId);
+            saveToStorage(key, categorias);
         }
-    }, [categorias, loading]);
+    }, [categorias, userId, loading]);
 
     const addCategoria = (categoria) => {
         const newCat = {

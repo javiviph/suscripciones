@@ -1,22 +1,31 @@
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { STORAGE_KEYS, getFromStorage, saveToStorage } from '../utils/storage';
+import { STORAGE_KEYS, getFromStorage, saveToStorage, getUserKey } from '../utils/storage';
 
-export const useSuscripciones = () => {
+export const useSuscripciones = (userId) => {
     const [suscripciones, setSuscripciones] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const stored = getFromStorage(STORAGE_KEYS.SUBSCRIPTIONS, []);
+        if (!userId) {
+            setSuscripciones([]);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        const key = getUserKey(STORAGE_KEYS.SUBSCRIPTIONS, userId);
+        const stored = getFromStorage(key, []);
         setSuscripciones(stored);
         setLoading(false);
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
-        if (!loading) {
-            saveToStorage(STORAGE_KEYS.SUBSCRIPTIONS, suscripciones);
+        if (!loading && userId) {
+            const key = getUserKey(STORAGE_KEYS.SUBSCRIPTIONS, userId);
+            saveToStorage(key, suscripciones);
         }
-    }, [suscripciones, loading]);
+    }, [suscripciones, userId, loading]);
 
     const addSuscripcion = (data) => {
         const newSub = {

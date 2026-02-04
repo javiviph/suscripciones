@@ -128,10 +128,12 @@ const Dashboard = ({ suscripciones, categorias }) => {
                     border-radius: 4px;
                 }
                 .empty-text {
-                    color: var(--text-secondary);
+                    color: var(--text-primary);
+                    opacity: 0.6;
                     font-style: italic;
                     text-align: center;
                     padding: 20px;
+                    font-size: 0.9rem;
                 }
             `}</style>
         </div>

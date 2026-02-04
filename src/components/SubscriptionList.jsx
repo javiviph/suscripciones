@@ -18,8 +18,8 @@ const SubscriptionList = ({ suscripciones, categorias, onEdit, onDelete }) => {
     if (suscripciones.length === 0) {
         return (
             <GlassCard className="empty-state">
-                <h3>No hay suscripciones</h3>
-                <p>Añade una nueva suscripción para comenzar</p>
+                <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px' }}>No hay suscripciones</h3>
+                <p style={{ color: 'var(--text-primary)', opacity: 0.7 }}>Añade una nueva suscripción para comenzar</p>
             </GlassCard>
         );
     }
