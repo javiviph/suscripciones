@@ -1,66 +1,93 @@
-@use '@carbon/styles/scss/config' with ($use-flexbox-grid: true,
-  $css--font-face: true);
-@use '@carbon/styles/scss/themes';
-@use '@carbon/styles';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-// --- MODERN THEME OVERRIDES ---
 :root {
-  // Softening the stark white/gray contrast
-  --cds-background: #f8f9fa;
-  --cds-ui-01: #f8f9fa;
-  --cds-ui-02: #ffffff; // Cards/Tiles background
+  /* Common Variables */
+  --border-radius-lg: 24px;
+  --border-radius-md: 16px;
+  --border-radius-sm: 12px;
 
-  // Rounded corners (Carbon is strict square, we override for "modern" feel)
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
 
-  // Shadows for depth
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* Light Theme (Default) */
+  --bg-color: #F3F4F6;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(255, 255, 255, 0.6);
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --accent-color: #FF5722;
+  /* Orange from inspiration */
+  --accent-gradient: linear-gradient(135deg, #FF5722 0%, #FF8A65 100%);
+  --glass-blur: blur(12px);
+  --success: #10B981;
+  --danger: #EF4444;
+}
+
+[data-theme='dark'] {
+  /* Dark Theme */
+  --bg-color: #0f0c29;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  /* Very transparent white */
+  --card-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --accent-color: #FF5722;
+  /* Keep orange as accent */
+  --accent-gradient: linear-gradient(135deg, #FF5722 0%, #FF8A65 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', 'IBM Plex Sans', system-ui, -apple-system, sans-serif; // Prefer Inter if available, fallback to Carbon
-  background-color: var(--cds-background);
-  color: #161616;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-// Global visual improvements
-.cds--tile {
-  background: var(--cds-ui-02);
-  border: 1px solid transparent; // Remove default border
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-
-  &:hover {
-    box-shadow: var(--shadow-md);
-  }
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.cds--modal-container {
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.cds--data-table-container {
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-// Soften inputs
-.cds--text-input,
-.cds--select-input,
-.cds--number-input,
-.cds--date-picker__input {
-  border-radius: var(--border-radius-sm);
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
 }
 
-// Make buttons slightly rounded
-.cds--btn {
-  border-radius: var(--border-radius-sm);
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+input,
+select {
+  font-family: inherit;
+  outline: none;
 }

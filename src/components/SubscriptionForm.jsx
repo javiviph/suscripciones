@@ -1,231 +1,275 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Modal,
-    TextInput,
-    NumberInput,
-    Select,
-    SelectItem,
-    DatePicker,
-    DatePickerInput,
-    Toggle,
-    TextArea,
-    FormGroup,
-    Grid,
-    Column,
-    InlineNotification
-} from '@carbon/react';
-import { FRECUENCIAS } from '../utils/calculations';
-import { validateSubscription } from '../utils/validators';
+import React, { useState } from 'react';
+import { ToggleLeft, ToggleRight, Plus, ChevronDown } from 'lucide-react';
+import { FluidInput } from './ui/FluidInput';
+import { AnimatedButton } from './ui/AnimatedButton';
 
-const SubscriptionForm = ({ open, subscription, categories, onClose, onSave }) => {
-    const isEdit = !!subscription;
-
-    const initialState = {
+const SubscriptionForm = ({ categories, onAdd, onAddCategory, initialData = null }) => {
+    // ... same state ...
+    const [formData, setFormData] = useState(initialData || {
         nombre: '',
-        precio: 0,
-        frecuencia: FRECUENCIAS.MENSUAL,
-        categoria: categories[0]?.id || '',
-        fechaInicio: '',
-        diaCobroMensual: '',
+        precio: '',
+        frecuencia: 'mensual',
+        categoria: '',
+        fechaInicio: new Date().toISOString().split('T')[0],
         esPrueba: false,
         fechaFinPrueba: '',
-        precioPostPrueba: 0,
+        recordarCancelacion: false,
         esCompartida: false,
-        precioTotal: 0,
-        miParte: 0,
-        notas: ''
-    };
+        miParte: ''
+    });
 
-    const [formData, setFormData] = useState(initialState);
     const [errors, setErrors] = useState({});
-
-    useEffect(() => {
-        if (subscription) {
-            setFormData({
-                ...initialState,
-                ...subscription,
-                fechaInicio: subscription.fechaInicio ? new Date(subscription.fechaInicio) : '',
-                fechaFinPrueba: subscription.fechaFinPrueba ? new Date(subscription.fechaFinPrueba) : ''
-            });
-        } else {
-            setFormData({
-                ...initialState,
-                categoria: categories[0]?.id || ''
-            });
-        }
-        setErrors({});
-    }, [subscription, open]); // Reset when opening/changing sub
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        // Clear error for field
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
     };
 
-    const handleSubmit = () => {
-        const { isValid, errors: newErrors } = validateSubscription(formData);
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const newErrors = {};
+        if (!formData.nombre) newErrors.nombre = 'El nombre es obligatorio';
+        if (!formData.precio) newErrors.precio = 'El precio es obligatorio';
+        if (!formData.categoria) newErrors.categoria = 'La categoría es obligatoria';
 
-        if (!isValid) {
+        if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
 
-        // Convert dates to ISO strings before saving
-        const dataToSave = {
+        onAdd({
             ...formData,
-            fechaInicio: formData.fechaInicio ? new Date(formData.fechaInicio).toISOString() : null,
-            fechaFinPrueba: formData.fechaFinPrueba ? new Date(formData.fechaFinPrueba).toISOString() : null,
-            diaCobroMensual: formData.diaCobroMensual ? parseInt(formData.diaCobroMensual) : null,
             precio: parseFloat(formData.precio),
-            miParte: formData.esCompartida ? parseFloat(formData.miParte) : 0,
-            precioTotal: formData.esCompartida ? parseFloat(formData.precioTotal) : 0,
-            precioPostPrueba: formData.esPrueba ? parseFloat(formData.precioPostPrueba) : 0,
-        };
+            miParte: formData.esCompartida ? parseFloat(formData.miParte) : null
+        });
 
-        onSave(dataToSave);
+        // Reset form
+        setFormData({
+            nombre: '',
+            precio: '',
+            frecuencia: 'mensual',
+            categoria: '',
+            fechaInicio: new Date().toISOString().split('T')[0],
+            esPrueba: false,
+            fechaFinPrueba: '',
+            recordarCancelacion: false,
+            esCompartida: false,
+            miParte: ''
+        });
     };
 
     return (
-        <Modal
-            open={open}
-            onRequestClose={onClose}
-            modalHeading={isEdit ? "Editar Suscripción" : "Añadir Suscripción"}
-            primaryButtonText="Guardar"
-            secondaryButtonText="Cancelar"
-            onRequestSubmit={handleSubmit}
-            onSecondarySubmit={onClose}
-            preventCloseOnClickOutside
-        >
-            <FormGroup>
-                <TextInput
-                    id="nombre"
-                    labelText="Nombre de la suscripción"
-                    placeholder="Ej: Netflix"
-                    value={formData.nombre}
-                    onChange={(e) => handleChange('nombre', e.target.value)}
-                    invalid={!!errors.nombre}
-                    invalidText={errors.nombre}
-                />
-            </FormGroup>
+        <form onSubmit={handleSubmit} className="subscription-form">
+            <FluidInput
+                id="nombre"
+                label="Nombre de la suscripción"
+                value={formData.nombre}
+                onChange={(e) => handleChange('nombre', e.target.value)}
+                error={errors.nombre}
+            />
 
-            <Grid className="form-grid">
-                <Column sm={2} md={4} lg={8}>
-                    <NumberInput
+            <div className="form-row-grid">
+                <div className="grid-item">
+                    <FluidInput
                         id="precio"
                         label="Precio (€)"
+                        type="number"
                         value={formData.precio}
-                        onChange={(e, { value }) => handleChange('precio', value)}
-                        invalid={!!errors.precio}
-                        invalidText={errors.precio}
-                        min={0}
-                        step={0.01}
+                        onChange={(e) => handleChange('precio', e.target.value)}
+                        error={errors.precio}
                     />
-                </Column>
-                <Column sm={2} md={4} lg={8}>
-                    <Select
-                        id="frecuencia"
-                        labelText="Frecuencia"
-                        value={formData.frecuencia}
-                        onChange={(e) => handleChange('frecuencia', e.target.value)}
-                    >
-                        {Object.values(FRECUENCIAS).map(f => (
-                            <SelectItem key={f} value={f} text={f.charAt(0).toUpperCase() + f.slice(1)} />
-                        ))}
-                    </Select>
-                </Column>
-            </Grid>
+                </div>
+                <div className="grid-item">
+                    <div className="custom-select-container">
+                        <label className="select-label">Frecuencia</label>
+                        <select
+                            value={formData.frecuencia}
+                            onChange={(e) => handleChange('frecuencia', e.target.value)}
+                            className="custom-select"
+                        >
+                            <option value="mensual">Mensual</option>
+                            <option value="trimestral">Trimestral</option>
+                            <option value="semestral">Semestral</option>
+                            <option value="anual">Anual</option>
+                        </select>
+                        <ChevronDown className="select-arrow" size={16} />
+                    </div>
+                </div>
+            </div>
 
-            <FormGroup style={{ marginTop: '1rem' }}>
-                <Select
-                    id="categoria"
-                    labelText="Categoría"
-                    value={formData.categoria}
-                    onChange={(e) => handleChange('categoria', e.target.value)}
+            <div className="custom-select-container">
+                <label className="select-label">Categoría</label>
+                <div className="select-with-action">
+                    <div className="select-relative">
+                        <select
+                            value={formData.categoria}
+                            onChange={(e) => handleChange('categoria', e.target.value)}
+                            className="custom-select"
+                        >
+                            <option value="">Seleccionar...</option>
+                            {categories.map(c => (
+                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="select-arrow" size={16} />
+                    </div>
+                    <AnimatedButton type="button" variant="secondary" onClick={() => onAddCategory({ nombre: 'Nueva', color: 'gray' })} className="add-cat-btn">
+                        <Plus size={18} />
+                    </AnimatedButton>
+                </div>
+                {errors.categoria && <span className="error-text">{errors.categoria}</span>}
+            </div>
+
+            <FluidInput
+                id="fechaInicio"
+                label="Fecha de Inicio"
+                type="date"
+                value={formData.fechaInicio}
+                onChange={(e) => handleChange('fechaInicio', e.target.value)}
+            />
+
+            <div className="toggles-section">
+                <div
+                    className={`toggle-item ${formData.esPrueba ? 'active' : ''}`}
+                    onClick={() => handleChange('esPrueba', !formData.esPrueba)}
                 >
-                    {categories.map(c => (
-                        <SelectItem key={c.id} value={c.id} text={c.nombre} />
-                    ))}
-                </Select>
-            </FormGroup>
-
-            <Grid className="form-grid" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                <Column sm={4} md={8} lg={16}>
-                    <Toggle
-                        id="esPrueba"
-                        labelText="¿Es período de prueba?"
-                        toggled={formData.esPrueba}
-                        onToggle={(checked) => handleChange('esPrueba', checked)}
-                    />
-                </Column>
-            </Grid>
-
-            {formData.esPrueba && (
-                <div style={{ padding: '1rem', background: '#f4f4f4', marginBottom: '1rem' }}>
-                    <DatePicker datePickerType="single" dateFormat="d/m/Y" onChange={(dates) => handleChange('fechaFinPrueba', dates[0])} value={formData.fechaFinPrueba}>
-                        <DatePickerInput
-                            id="fechaFinPrueba"
-                            labelText="Fecha Fin de Prueba"
-                            placeholder="dd/mm/yyyy"
-                            invalid={!!errors.fechaFinPrueba}
-                            invalidText={errors.fechaFinPrueba}
-                        />
-                    </DatePicker>
-                    <NumberInput
-                        id="precioPost"
-                        label="Precio después de prueba (€)"
-                        value={formData.precioPostPrueba}
-                        onChange={(e, { value }) => handleChange('precioPostPrueba', value)}
-                        style={{ marginTop: '1rem' }}
-                    />
+                    <span>¿Período de prueba?</span>
+                    {formData.esPrueba ? <ToggleRight color="var(--accent-color)" /> : <ToggleLeft color="var(--text-secondary)" />}
                 </div>
-            )}
 
-            <Grid className="form-grid" style={{ marginBottom: '1rem' }}>
-                <Column sm={4} md={8} lg={16}>
-                    <Toggle
-                        id="esCompartida"
-                        labelText="¿Es compartida?"
-                        toggled={formData.esCompartida}
-                        onToggle={(checked) => handleChange('esCompartida', checked)}
+                {formData.esPrueba && (
+                    <FluidInput
+                        id="fechaFinPrueba"
+                        label="Fin de prueba"
+                        type="date"
+                        value={formData.fechaFinPrueba}
+                        onChange={(e) => handleChange('fechaFinPrueba', e.target.value)}
                     />
-                </Column>
-            </Grid>
+                )}
 
-            {formData.esCompartida && (
-                <div style={{ padding: '1rem', background: '#e0e0e0', marginBottom: '1rem' }}>
-                    <Grid>
-                        <Column sm={2} md={4} lg={8}>
-                            <NumberInput
-                                id="precioTotal"
-                                label="Precio Total (€)"
-                                value={formData.precioTotal}
-                                onChange={(e, { value }) => handleChange('precioTotal', value)}
-                            />
-                        </Column>
-                        <Column sm={2} md={4} lg={8}>
-                            <NumberInput
-                                id="miParte"
-                                label="Mi parte (€)"
-                                value={formData.miParte}
-                                onChange={(e, { value }) => handleChange('miParte', value)}
-                                invalid={!!errors.miParte}
-                                invalidText={errors.miParte}
-                            />
-                        </Column>
-                    </Grid>
+                <div
+                    className={`toggle-item ${formData.esCompartida ? 'active' : ''}`}
+                    onClick={() => handleChange('esCompartida', !formData.esCompartida)}
+                >
+                    <span>¿Es compartida?</span>
+                    {formData.esCompartida ? <ToggleRight color="var(--accent-color)" /> : <ToggleLeft color="var(--text-secondary)" />}
                 </div>
-            )}
 
-            <FormGroup>
-                <TextArea
-                    labelText="Notas"
-                    value={formData.notas}
-                    onChange={(e) => handleChange('notas', e.target.value)}
-                    rows={3}
-                />
-            </FormGroup>
+                {formData.esCompartida && (
+                    <FluidInput
+                        id="miParte"
+                        label="Mi parte del costo"
+                        type="number"
+                        value={formData.miParte}
+                        onChange={(e) => handleChange('miParte', e.target.value)}
+                    />
+                )}
+            </div>
 
-        </Modal>
+            <AnimatedButton type="submit" isLoading={false} className="submit-btn" size="lg">
+                Guardar Suscripción
+            </AnimatedButton>
+
+            <style>{`
+                .subscription-form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+                .form-row-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 16px;
+                    align-items: start;
+                }
+                .grid-item {
+                    width: 100%;
+                }
+                .custom-select-container {
+                    position: relative;
+                    width: 100%;
+                }
+                .select-label {
+                    position: absolute;
+                    top: -10px;
+                    left: 12px;
+                    font-size: 0.85rem;
+                    color: var(--accent-color);
+                    background: var(--card-bg);
+                    padding: 0 4px;
+                    border-radius: 4px;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+                .select-with-action {
+                    display: flex;
+                    gap: 8px;
+                    align-items: stretch;
+                }
+                .select-relative {
+                    position: relative;
+                    flex: 1;
+                }
+                .custom-select {
+                    width: 100%;
+                    padding: 16px;
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 12px;
+                    color: var(--text-primary);
+                    font-size: 1rem;
+                    outline: none;
+                    transition: all 0.2s;
+                    appearance: none;
+                    cursor: pointer;
+                    height: 56px; /* Explicit height to match FluidInput */
+                }
+                .custom-select:focus {
+                    border-color: var(--accent-color);
+                    background: rgba(255,255,255,0.05);
+                }
+                .select-arrow {
+                    position: absolute;
+                    right: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--text-secondary);
+                    pointer-events: none;
+                }
+                .add-cat-btn {
+                    padding: 0 12px !important;
+                    height: auto;
+                }
+                .error-text {
+                    color: #ff4d4d;
+                    font-size: 0.8rem;
+                    margin-top: 4px;
+                    display: block;
+                }
+                .toggles-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    padding: 16px;
+                    background: rgba(255,255,255,0.02);
+                    border: 1px solid rgba(255,255,255,0.05);
+                    border-radius: 16px;
+                }
+                .toggle-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    cursor: pointer;
+                    padding: 4px 0;
+                    font-size: 0.95rem;
+                }
+                .submit-btn {
+                    margin-top: 10px;
+                    height: 52px;
+                    font-weight: 600;
+                }
+            `}</style>
+        </form>
     );
 };
 

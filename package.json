@@ -10,14 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@carbon/charts": "^1.19.0",
-    "@carbon/charts-react": "^1.19.0",
-    "@carbon/icons-react": "^11.55.0",
-    "@carbon/react": "^1.72.0",
-    "@carbon/styles": "^1.72.0",
-    "d3": "^7.9.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.2.10",
+    "lucide-react": "^0.395.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.3.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

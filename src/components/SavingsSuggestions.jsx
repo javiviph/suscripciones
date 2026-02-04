@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Tile, Button, Modal } from '@carbon/react';
-import { Idea, Calculator } from '@carbon/icons-react';
+import { Lightbulb, Calculator, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '../utils/formatters';
+import { GlassCard } from './ui/GlassCard';
+import { AnimatedButton } from './ui/AnimatedButton';
 
 const SavingsSuggestions = ({ suscripciones }) => {
     const [isSimulating, setIsSimulating] = useState(false);
 
-    // Analyze simple opportunities
     const activeSubs = suscripciones.filter(s => s.estado === 'activa' && !s.esPrueba);
-
-    // 1. Top 3 most expensive
     const sortedByPrice = [...activeSubs].sort((a, b) => b.precio - a.precio);
     const top3 = sortedByPrice.slice(0, 3);
     const potentialSavings = top3.reduce((acc, curr) => acc + curr.precio, 0);
@@ -17,39 +16,122 @@ const SavingsSuggestions = ({ suscripciones }) => {
     if (activeSubs.length === 0) return null;
 
     return (
-        <Tile style={{ marginTop: '1rem', border: '1px solid #e0e0e0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <Idea size={20} fill="#0f62fe" />
-                <h4 style={{ margin: 0 }}>Oportunidades de Ahorro</h4>
+        <GlassCard className="savings-card">
+            <div className="card-header">
+                <Lightbulb size={24} color="#f1c21b" />
+                <h4>Oportunidades de Ahorro</h4>
             </div>
 
-            <p style={{ marginBottom: '1rem' }}>
+            <p className="suggestion-text">
                 Podrías ahorrar hasta <strong>{formatCurrency(potentialSavings)}/mes</strong> cancelando tus 3 suscripciones más costosas:
             </p>
-            <ul style={{ marginBottom: '1rem', paddingLeft: '1.2rem' }}>
+            <ul className="top-list">
                 {top3.map(s => (
-                    <li key={s.id}>{s.nombre} ({formatCurrency(s.precio)})</li>
+                    <li key={s.id}>
+                        <span className="dot" />
+                        {s.nombre} ({formatCurrency(s.precio)})
+                    </li>
                 ))}
             </ul>
 
-            <Button kind="tertiary" size="sm" renderIcon={Calculator} onClick={() => setIsSimulating(true)}>
-                Simular ahorro
-            </Button>
-
-            <Modal
-                open={isSimulating}
-                onRequestClose={() => setIsSimulating(false)}
-                modalHeading="Simulador de Ahorro"
-                passiveModal
+            <AnimatedButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setIsSimulating(true)}
+                className="sim-btn"
             >
-                <p style={{ marginBottom: '1rem' }}>
-                    Si cancelaras estas suscripciones, tu gasto anual se reduciría en <strong>{formatCurrency(potentialSavings * 12)}</strong>.
-                </p>
-                <p>
-                    Esta es una simulación simple basada en tus suscripciones activas más costosas.
-                </p>
-            </Modal>
-        </Tile>
+                <Calculator size={16} /> Simular ahorro
+            </AnimatedButton>
+
+            <AnimatePresence>
+                {isSimulating && (
+                    <motion.div
+                        className="modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <GlassCard className="modal-content-centered">
+                            <div className="modal-header">
+                                <h3>Simulador de Ahorro</h3>
+                                <button onClick={() => setIsSimulating(false)}><X size={20} color="white" /></button>
+                            </div>
+                            <div className="sim-content">
+                                <p>Si cancelaras estas suscripciones, tu gasto anual se reduciría en:</p>
+                                <div className="big-saving">
+                                    {formatCurrency(potentialSavings * 12)}
+                                </div>
+                                <p className="small-text">
+                                    Esta es una simulación simple basada en tus suscripciones activas más costosas.
+                                </p>
+                            </div>
+                        </GlassCard>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <style>{`
+                .savings-card {
+                    border: 1px solid rgba(241, 194, 27, 0.3);
+                    background: rgba(241, 194, 27, 0.05);
+                }
+                .card-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 16px;
+                    h4 { margin: 0; }
+                }
+                .suggestion-text {
+                    font-size: 0.9rem;
+                    line-height: 1.5;
+                    margin-bottom: 12px;
+                }
+                .top-list {
+                    list-style: none;
+                    margin-bottom: 16px;
+                    li {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 0.9rem;
+                        color: var(--text-secondary);
+                        margin-bottom: 4px;
+                    }
+                    .dot {
+                        width: 6px;
+                        height: 6px;
+                        background: var(--accent-color);
+                        border-radius: 50%;
+                    }
+                }
+                .sim-btn {
+                    width: 100%;
+                }
+                .modal-content-centered {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 90%;
+                    max-width: 400px;
+                    z-index: 101;
+                    background: rgba(15, 12, 41, 0.95);
+                }
+                .big-saving {
+                    font-size: 2.5rem;
+                    font-weight: 800;
+                    color: #4caf50;
+                    margin: 16px 0;
+                    text-align: center;
+                }
+                .small-text {
+                    font-size: 0.8rem;
+                    color: var(--text-secondary);
+                    text-align: center;
+                }
+            `}</style>
+        </GlassCard>
     );
 };
 
