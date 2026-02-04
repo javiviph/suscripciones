@@ -44,7 +44,7 @@ export const useUsers = () => {
             fechaCreacion: new Date().toISOString()
         };
         setUsers(prev => [...prev, newUser]);
-        setCurrentUser(newUser);
+        // Don't auto-select, stay on selection screen
         return newUser;
     };
 

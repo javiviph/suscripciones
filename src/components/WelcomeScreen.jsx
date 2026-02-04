@@ -14,6 +14,7 @@ const WelcomeScreen = ({ users, onSelect, onAdd }) => {
         if (newName.trim()) {
             onAdd(newName.trim());
             setNewName('');
+            setIsCreating(false); // Go back to user grid
         }
     };
 

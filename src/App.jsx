@@ -66,10 +66,7 @@ function App() {
                     <h1>Suscriptions</h1>
                     <div className="header-actions">
                         <UserNavigation
-                            users={users}
                             currentUser={currentUser}
-                            onSelect={selectUser}
-                            onAdd={addUser}
                             onLogout={logout}
                         />
                         <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
@@ -101,7 +98,7 @@ function App() {
                 <div className="desktop-form-column">
                     <div className="sticky-form">
                         <GlassCard>
-                            <h3>{editingSubscription ? 'Editar Suscripción' : 'Nueva Suscripción'}</h3>
+                            <h3 style={{ color: 'var(--text-primary)', marginBottom: '20px' }}>{editingSubscription ? 'Editar Suscripción' : 'Nueva Suscripción'}</h3>
                             <SubscriptionForm
                                 key={`${currentUser.id}-${editingSubscription ? editingSubscription.id : 'new'}`}
                                 categories={categorias}
@@ -136,7 +133,7 @@ function App() {
                     >
                         <GlassCard className="modal-content">
                             <div className="modal-header">
-                                <h3>{editingSubscription ? 'Editar Suscripción' : 'Nueva Suscripción'}</h3>
+                                <h3 style={{ color: 'var(--text-primary)' }}>{editingSubscription ? 'Editar Suscripción' : 'Nueva Suscripción'}</h3>
                                 <button className="close-btn" onClick={handleCloseModal}><X size={20} /></button>
                             </div>
                             <SubscriptionForm

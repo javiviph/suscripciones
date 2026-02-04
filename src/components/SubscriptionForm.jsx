@@ -222,11 +222,19 @@ const SubscriptionForm = ({ categories, onAdd, onAddCategory, initialData = null
                     transition: all 0.2s;
                     appearance: none;
                     cursor: pointer;
-                    height: 56px; /* Explicit height to match FluidInput */
+                    height: 56px;
+                }
+                [data-theme='light'] .custom-select {
+                    background: rgba(0,0,0,0.03);
+                    border-color: rgba(0,0,0,0.15);
+                    color: #1a1a1a;
                 }
                 .custom-select:focus {
                     border-color: var(--accent-color);
                     background: rgba(255,255,255,0.05);
+                }
+                [data-theme='light'] .custom-select:focus {
+                    background: rgba(0,0,0,0.05);
                 }
                 .select-arrow {
                     position: absolute;
@@ -235,6 +243,9 @@ const SubscriptionForm = ({ categories, onAdd, onAddCategory, initialData = null
                     transform: translateY(-50%);
                     color: var(--text-secondary);
                     pointer-events: none;
+                }
+                [data-theme='light'] .select-arrow {
+                    color: #666;
                 }
                 .add-cat-btn {
                     padding: 0 12px !important;
@@ -255,6 +266,10 @@ const SubscriptionForm = ({ categories, onAdd, onAddCategory, initialData = null
                     border: 1px solid rgba(255,255,255,0.05);
                     border-radius: 16px;
                 }
+                [data-theme='light'] .toggles-section {
+                    background: rgba(0,0,0,0.02);
+                    border-color: rgba(0,0,0,0.08);
+                }
                 .toggle-item {
                     display: flex;
                     justify-content: space-between;
@@ -262,6 +277,7 @@ const SubscriptionForm = ({ categories, onAdd, onAddCategory, initialData = null
                     cursor: pointer;
                     padding: 4px 0;
                     font-size: 0.95rem;
+                    color: var(--text-primary);
                 }
                 .submit-btn {
                     margin-top: 10px;
